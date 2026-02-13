@@ -12,12 +12,34 @@ import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import OwnerDashboard from './pages/OwnerDashboard';
 
+function AuthRedirect() {
+  // Lấy thông tin user từ bộ nhớ
+  const user = JSON.parse(localStorage.getItem('currentUser'));
+
+  // Nếu chưa đăng nhập -> Cho vào trang chủ xem hàng bình thường
+  if (!user) {
+    return <Home />;
+  }
+
+  // Nếu đã đăng nhập, kiểm tra chức vụ (Role)
+  if (user.role === 'admin') {
+    return <Navigate to="/admin" replace />; // replace giúp không lưu lịch sử (để bấm Back không bị lỗi)
+  }
+
+  if (user.role === 'owner') {
+    return <Navigate to="/owner" replace />;
+  }
+
+  // Nếu là user thường -> Vẫn cho vào Home mua hàng
+  return <Home />;
+}
+
 function App() {
   return (
     <Router>
       <Routes>
         {/* Mặc định vào trang chủ luôn, không cần đăng nhập */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<AuthRedirect />} />
         
         {/* Đường dẫn riêng cho trang đăng nhập */}
         <Route path="/login" element={<Login />} />

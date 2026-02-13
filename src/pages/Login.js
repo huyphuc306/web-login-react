@@ -53,10 +53,11 @@ function Login() {
                 
                 if (user.role === 'admin') {
                     navigate('/admin'); // Nếu là admin -> Sang trang quản trị
+                } else if (user.role === 'owner'){
+                    navigate('/owner');      // Nếu là user -> Sang trang chủ mua hàng
                 } else {
-                    navigate('/');      // Nếu là user -> Sang trang chủ mua hàng
-                }
-
+                  navigate('/'); // User thường về trang chủ
+                }  
             } else {
                 message.error('Mật khẩu không đúng!');
             }
