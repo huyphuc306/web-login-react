@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, Button, message, Space, Modal, Form, Input, Popconfirm, InputNumber } from 'antd';
+import { Layout, Button, message, Space, Modal, Form, Input, Popconfirm, InputNumber, Select, Tag } from 'antd';
 import { LogoutOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 // import axios from 'axios'; <--- KHÔNG CẦN DÒNG NÀY NỮA
 import { useAuth } from '../hooks/useAuth';
@@ -35,6 +35,7 @@ function OwnerDashboard() {
         form.setFieldsValue(editingProduct);
       } else {
         form.resetFields();
+        form.setFieldsValue({ status: 'new' }); 
       }
     }
   }, [isModalOpen, editingProduct, form]);
@@ -105,6 +106,51 @@ function OwnerDashboard() {
         ...getNumberSorter('price'),
         render: (price) => (<span style={{ fontWeight: 'bold', color: '#d4380d' }}>{formatCurrencyVN(price)}</span>)
     },
+
+    {
+        title: 'Độ mới',
+        dataIndex: 'status',
+        key: 'status',
+        width: '15%',
+        filters: [
+            { text: 'Mới 100%', value: 'new' },
+            { text: 'Like New (99%)', value: 'like_new' },
+            { text: 'Đã dùng (Tốt)', value: 'used_good' },
+            { text: 'Trầy xước / Cũ', value: 'used_bad' },
+        ],
+        onFilter: (value, record) => record.status === value,
+        render: (status) => {
+            // Logic hiển thị màu sắc theo độ mới
+            let color = 'default';
+            let text = 'Không xác định';
+
+            switch (status) {
+                case 'new':
+                    color = 'green';
+                    text = 'MỚI 100%';
+                    break;
+                case 'like_new':
+                    color = 'cyan'; // Màu xanh ngọc
+                    text = 'LIKE NEW 99%';
+                    break;
+                case 'used_good':
+                    color = 'blue';
+                    text = 'ĐÃ DÙNG (TỐT)';
+                    break;
+                case 'used_bad':
+                    color = 'red'; // Màu đỏ cảnh báo
+                    text = 'CŨ / XƯỚC';
+                    break;
+                default:
+                    // Hỗ trợ hiển thị dữ liệu cũ nếu có
+                    if (status === 'active') { color = 'green'; text = 'ĐANG BÁN'; }
+                    else if (status === 'stop') { color = 'default'; text = 'NGỪNG BÁN'; }
+            }
+            
+            return <Tag color={color}>{text}</Tag>;
+        }
+    },
+
     { title: 'Mô tả', dataIndex: 'description', key: 'description', ellipsis: true },
     {
         title: 'Hành động', key: 'action',
@@ -150,6 +196,15 @@ function OwnerDashboard() {
             
             <Form.Item name="price" label="Giá bán" rules={[{ required: true, message: 'Vui lòng nhập giá' }]}>
                 <InputNumber style={{ width: '100%' }} placeholder="Nhập giá tiền" formatter={formatNumber} parser={parseNumber} addonAfter="VNĐ" />
+            </Form.Item>
+
+            <Form.Item name="status" label="Tình trạng thực tế" rules={[{ required: true, message: 'Vui lòng chọn tình trạng' }]}>
+                <Select placeholder="Chọn tình trạng sản phẩm">
+                    <Option value="new">🆕 Mới 100% (Fullbox/Chưa bóc seal)</Option>
+                    <Option value="like_new">✨ Like New (99% - Như mới)</Option>
+                    <Option value="used_good">👌 Đã qua sử dụng (Còn tốt, ít xước)</Option>
+                    <Option value="used_bad">⚠️ Cũ / Trầy xước nhiều / Hỏng nhẹ</Option>
+                </Select>
             </Form.Item>
 
             <Form.Item name="img" label="Link ảnh (URL)">
