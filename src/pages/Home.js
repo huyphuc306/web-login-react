@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { userProfile, productList } from '../data/mockData'; // Lấy dữ liệu về
 import '../App.css'; // Dùng chung CSS cho đẹp
-import { Avatar, Button, Card, Col, Layout, Menu, Row, theme, Breadcrumb, Space, Input, Select } from 'antd';
+import { Avatar, Button, Card, Col, Layout, Menu, Row, theme, Breadcrumb, Space, Input, Select, Empty, Spin, message } from 'antd';
 import { HomeOutlined, ShoppingCartOutlined, UserOutlined } from '@ant-design/icons'; // Nhập biểu tượng hình người
 import { useNavigate } from 'react-router-dom';
 import AppHeader from '../components/AppHeader';
+
+// 1. Import Service và Helper
+import { productService } from '../services/productService';
+import { formatCurrencyVN } from '../utils/formatHelper';
 
 const { Header, Content, Footer } = Layout;
 const { Meta } = Card; // Thành phần con để hiển thị tiêu đề và mô tả trong Card
@@ -17,20 +21,33 @@ function Home() {
   } = theme.useToken();
 
   // --- 1. KHAI BÁO STATE (TRẠNG THÁI) ---
+  const [products, setProducts] = useState([]); // Danh sách sản phẩm từ API
+  const [loading, setLoading] = useState(true); // Trạng thái loading
   const [searchText, setSearchText] = useState(''); // Lưu từ khóa tìm kiếm
   const [sortType, setSortType] = useState('default'); // Lưu kiểu sắp xếp (mặc định, A-Z, giá tăng, giá giảm)
 
-  // --- 2. HÀM XỬ LÝ DỮ LIỆU ---
-  
-  // Hàm phụ: Chuyển chuỗi "34.000.000 VNĐ" thành số 34000000 để tính toán
-  const parsePrice = (priceString) => {
-    return parseInt(priceString.replace(/\./g, '').replace(' VNĐ', ''));
-  };
+  // --- 2. GỌI API LẤY SẢN PHẨM ---
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setLoading(true);
+        const data = await productService.getAll();
+        setProducts(data);
+      } catch (error) {
+        console.error(error);
+        message.error('Không thể tải danh sách sản phẩm!');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
 
   // Logic lọc và sắp xếp sản phẩm
   const getProcessedProducts = () => {
     // B1: Copy dữ liệu gốc ra một mảng mới để xử lý
-    let tempProducts = [...productList];
+    let tempProducts = [...products];
 
     // B2: Lọc theo tên (Search)
     if (searchText) {
@@ -60,10 +77,10 @@ function Home() {
   return (
     <Layout className="layout" style={{ minHeight: '100vh' }}>
       
-      {/* --- PHẦN THANH ĐIỀU HƯỚNG (HEADER) --- */}
+      {/* --- THANH ĐIỀU HƯỚNG (HEADER) --- */}
       <AppHeader />
 
-      {/* --- PHẦN NỘI DUNG CHÍNH --- */}
+      {/* --- NỘI DUNG CHÍNH --- */}
       <Content style={{ padding: '0 48px', marginTop: '20px' }}>
 
         {/* --- BREADCRUMB MỚI THÊM --- */}
@@ -146,7 +163,9 @@ function Home() {
                             >
                                 <Meta 
                                     title={product.name} 
-                                    description={<span style={{ color: '#d4380d', fontWeight: 'bold' }}>{product.price}</span>} 
+                                    description={<span style={{ color: '#d4380d', fontWeight: 'bold' }}>
+                                        {formatCurrencyVN(product.price)}
+                                    </span>} 
                                 />
                             </Card>
                         </Col>
