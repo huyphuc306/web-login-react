@@ -11,6 +11,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import OwnerDashboard from './pages/OwnerDashboard';
+import UserProfile from './pages/UserProfile';
 
 function AuthRedirect() {
   // Lấy thông tin user từ bộ nhớ
@@ -45,6 +46,15 @@ function App() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/register" element={<Register />} />
+
+        <Route path="/profile" element={
+            // Nếu chưa đăng nhập -> ProtectedRoute sẽ đá về Login
+            // Tham số requiredRole không truyền -> Ai cũng vào được miễn là đã login
+            <ProtectedRoute>
+              <UserProfile />
+            </ProtectedRoute>
+          } 
+        />
 
         {/* ÁP DỤNG BẢO VỆ CHO ROUTE ADMIN */}
         <Route 
