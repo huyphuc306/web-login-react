@@ -11,6 +11,18 @@ export const userService = {
   // MockAPI hỗ trợ filter dạng: /users?username=abc
   findByUsername: (username) => api.get(`/users?username=${username}`),
 
+  // Thêm hàm này: Tìm user theo Email
+  findByEmail: async (email) => {
+    // 1. Lấy tất cả user về
+    const allUsers = await api.get('/users');
+    
+    // 2. Dùng JS để lọc
+    // Kết quả trả về là Mảng chứa user tìm thấy (hoặc rỗng) để giống logic cũ
+    const foundUser = allUsers.find(u => u.email === email);
+    
+    return foundUser ? [foundUser] : []; 
+  },
+
   // 4. Tạo user mới (Dùng cho Admin hoặc trang Register)
   create: (data) => api.post('/users', data),
 
