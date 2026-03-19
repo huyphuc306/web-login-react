@@ -12,27 +12,47 @@ import ProtectedRoute from './components/ProtectedRoute';
 import NotFound from './pages/NotFound';
 import OwnerDashboard from './pages/OwnerDashboard';
 import UserProfile from './pages/UserProfile';
+import AdminProducts from './pages/AdminProducts';
+
+const rolePaths = {
+  admin: '/admin',
+  owner: '/owner',
+};
 
 function AuthRedirect() {
-  // Lấy thông tin user từ bộ nhớ
-  const user = JSON.parse(localStorage.getItem('currentUser'));
 
-  // Nếu chưa đăng nhập -> Cho vào trang chủ xem hàng bình thường
+  console.log('1. AuthRedirect bắt đầu chạy');
+  
+  let user = null;
+  
+  try {
+    const storedUser = localStorage.getItem('currentUser');
+    console.log('2. Dữ liệu trong localStorage:', storedUser);
+    
+    if (storedUser) {
+      user = JSON.parse(storedUser);
+      console.log('3. Parse thành công:', user);
+    }
+  } catch (error) {
+    console.error('LỖI PARSE:', error);
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('isLoggedIn');
+  }
+
   if (!user) {
+    console.log('4. Chưa đăng nhập → Hiện Home');
     return <Home />;
   }
 
-  // Nếu đã đăng nhập, kiểm tra chức vụ (Role)
-  if (user.role === 'admin') {
-    return <Navigate to="/admin" replace />; // replace giúp không lưu lịch sử (để bấm Back không bị lỗi)
+  const redirectPath = rolePaths[user.role];
+  console.log('5. Role:', user.role, '→ Redirect:', redirectPath);
+  
+  if (redirectPath) {
+    return <Navigate to={redirectPath} replace />;
   }
 
-  if (user.role === 'owner') {
-    return <Navigate to="/owner" replace />;
-  }
-
-  // Nếu là user thường -> Vẫn cho vào Home mua hàng
   return <Home />;
+  
 }
 
 function App() {
@@ -64,6 +84,15 @@ function App() {
             // Yêu cầu bắt buộc: role phải là 'admin'
             <ProtectedRoute requiredRole="admin">
               <AdminDashboard />
+            </ProtectedRoute>
+          } 
+        />
+
+        <Route 
+          path="/admin/products" 
+          element={
+            <ProtectedRoute requiredRole="admin">
+              <AdminProducts />
             </ProtectedRoute>
           } 
         />

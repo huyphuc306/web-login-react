@@ -9,6 +9,7 @@ import DataTable from '../components/DataTable';
 
 // 1. IMPORT SERVICE VỪA TẠO
 import { productService } from '../services/productService';
+import ImageUpload from '../components/ImageUpload';
 
 const { Header, Content } = Layout;
 const { TextArea } = Input;
@@ -168,7 +169,7 @@ function OwnerDashboard() {
   return (
     <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
       <Header style={{ padding: '0 20px', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 1px 4px rgba(0,21,41,0.08)' }}>
-         <h2 style={{ margin: 0, color: '#001529' }}>Kênh người bán - {currentUser.fullName}</h2>
+         <h2 style={{ margin: 0, color: '#001529' }}>Kênh người bán - {currentUser.fullname}</h2>
          <Button type="primary" danger icon={<LogoutOutlined />} onClick={logout}>Đăng xuất</Button>
       </Header>
 
@@ -207,9 +208,14 @@ function OwnerDashboard() {
                 </Select>
             </Form.Item>
 
-            <Form.Item name="img" label="Link ảnh (URL)">
+            {/* <Form.Item name="img" label="Link ảnh (URL)">
                 <Input placeholder="https://..." />
+            </Form.Item> */}
+
+            <Form.Item name="img" label="Ảnh sản phẩm">
+                <ImageUpload />
             </Form.Item>
+
             <Form.Item name="description" label="Mô tả chi tiết">
                 <TextArea rows={4} placeholder="Nhập mô tả sản phẩm..." />
             </Form.Item>
