@@ -1,20 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Button, message, Space, Modal, Form, Input, Popconfirm, InputNumber, Select, Tag } from 'antd';
-import { LogoutOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
-// import axios from 'axios'; <--- KHÔNG CẦN DÒNG NÀY NỮA
+import { LogoutOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { formatNumber, parseNumber, formatCurrencyVN } from '../utils/formatHelper';
 import { getNumberSorter, getStringSorter } from '../utils/tableHelper';
 import DataTable from '../components/DataTable';
-
-// 1. IMPORT SERVICE VỪA TẠO
 import { productService } from '../services/productService';
 import ImageUpload from '../components/ImageUpload';
+import StarRating from '../components/StarRating';
 
 const { Header, Content } = Layout;
 const { TextArea } = Input;
-
-// const PRODUCT_API_URL = ...; <--- KHÔNG CẦN DÒNG NÀY NỮA
+const { Option } = Select;
 
 function OwnerDashboard() {
   const { logout } = useAuth();
@@ -36,7 +33,7 @@ function OwnerDashboard() {
         form.setFieldsValue(editingProduct);
       } else {
         form.resetFields();
-        form.setFieldsValue({ status: 'new' }); 
+        form.setFieldsValue({ status: 'new' });
       }
     }
   }, [isModalOpen, editingProduct, form]);
@@ -44,11 +41,8 @@ function OwnerDashboard() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      // 2. GỌI API QUA SERVICE (Ngắn gọn hơn nhiều)
-      // Lưu ý: data trả về là mảng luôn, không cần res.data
-      const data = await productService.getAll(); 
-      
-      const myProducts = data.filter(p => p.ownerId === currentUser.id); 
+      const data = await productService.getAll();
+      const myProducts = data.filter(p => p.ownerId === currentUser.id);
       setProducts(myProducts);
     } catch (error) {
       message.error('Lỗi tải dữ liệu sản phẩm');
@@ -59,18 +53,26 @@ function OwnerDashboard() {
 
   const handleSubmit = async (values) => {
     try {
+        // Xử lý ảnh: images là mảng, img là ảnh đầu tiên (ảnh đại diện)
+        const images = values.images || [];
+        
         const productData = {
             ...values,
-            ownerId: currentUser.id || 'unknown', 
-            img: values.img || 'https://via.placeholder.com/200' 
+            img: images.length > 0 ? images[0] : 'https://via.placeholder.com/200',
+            images: images,
+            ownerId: currentUser.id || 'unknown',
+            status: values.status || 'new',
         };
 
         if (editingProduct) {
-            // 3. GỌI HÀM UPDATE
+            // SỬA: Giữ nguyên rating và reviewCount cũ
             await productService.update(editingProduct.id, productData);
             message.success('Cập nhật thành công!');
         } else {
-            // 4. GỌI HÀM CREATE
+            // TẠO MỚI: Rating và ReviewCount bắt đầu từ 0
+            productData.rating = 0;
+            productData.reviewCount = 0;
+
             await productService.create(productData);
             message.success('Đăng mới thành công!');
         }
@@ -83,7 +85,6 @@ function OwnerDashboard() {
 
   const handleDelete = async (id) => {
     try {
-        // 5. GỌI HÀM DELETE
         await productService.delete(id);
         message.success('Đã xóa sản phẩm');
         fetchProducts();
@@ -92,140 +93,142 @@ function OwnerDashboard() {
     }
   };
 
-  // ... (Phần columns và return giữ nguyên không đổi) ...
   const columns = [
-    { 
-        title: 'Ảnh', dataIndex: 'img', key: 'img',
-        render: (src) => <img src={src} alt="sp" style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4, border: '1px solid #ddd' }} />
-    },
-    { 
-        title: 'Tên sản phẩm', dataIndex: 'name', key: 'name', width: '25%',
-        ...getStringSorter('name')
-    },
-    { 
-        title: 'Giá', dataIndex: 'price', key: 'price',
-        ...getNumberSorter('price'),
-        render: (price) => (<span style={{ fontWeight: 'bold', color: '#d4380d' }}>{formatCurrencyVN(price)}</span>)
-    },
-
     {
-        title: 'Độ mới',
-        dataIndex: 'status',
-        key: 'status',
-        width: '15%',
-        filters: [
-            { text: 'Mới 100%', value: 'new' },
-            { text: 'Like New (99%)', value: 'like_new' },
-            { text: 'Đã dùng (Tốt)', value: 'used_good' },
-            { text: 'Trầy xước / Cũ', value: 'used_bad' },
-        ],
-        onFilter: (value, record) => record.status === value,
-        render: (status) => {
-            // Logic hiển thị màu sắc theo độ mới
-            let color = 'default';
-            let text = 'Không xác định';
-
-            switch (status) {
-                case 'new':
-                    color = 'green';
-                    text = 'MỚI 100%';
-                    break;
-                case 'like_new':
-                    color = 'cyan'; // Màu xanh ngọc
-                    text = 'LIKE NEW 99%';
-                    break;
-                case 'used_good':
-                    color = 'blue';
-                    text = 'ĐÃ DÙNG (TỐT)';
-                    break;
-                case 'used_bad':
-                    color = 'red'; // Màu đỏ cảnh báo
-                    text = 'CŨ / XƯỚC';
-                    break;
-                default:
-                    // Hỗ trợ hiển thị dữ liệu cũ nếu có
-                    if (status === 'active') { color = 'green'; text = 'ĐANG BÁN'; }
-                    else if (status === 'stop') { color = 'default'; text = 'NGỪNG BÁN'; }
-            }
-            
-            return <Tag color={color}>{text}</Tag>;
-        }
+      title: 'Ảnh',
+      dataIndex: 'images',
+      key: 'images',
+      width: 80,
+      render: (images, record) => {
+        // Lấy ảnh đầu tiên trong mảng, nếu không có thì lấy img
+        const src = (images && images.length > 0) ? images[0] : record.img;
+        return (
+          <img
+            src={src}
+            alt="sp"
+            style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4, border: '1px solid #ddd' }}
+            onError={(e) => { e.target.onerror = null; e.target.src = "https://via.placeholder.com/50"; }}
+          />
+        );
+      }
     },
-
+    {
+      title: 'Tên sản phẩm', dataIndex: 'name', key: 'name', width: '20%',
+      ...getStringSorter('name')
+    },
+    {
+      title: 'Giá', dataIndex: 'price', key: 'price',
+      ...getNumberSorter('price'),
+      render: (price) => (<span style={{ fontWeight: 'bold', color: '#d4380d' }}>{formatCurrencyVN(price)}</span>)
+    },
+    {
+      title: 'Đánh giá',
+      dataIndex: 'rating',
+      key: 'rating',
+      width: '20%',
+      ...getNumberSorter('rating'),
+      render: (rating, record) => (
+        <StarRating
+          rating={rating}
+          reviewCount={record.reviewCount}
+          size={12}
+        />
+      )
+    },
+    {
+      title: 'Độ mới', dataIndex: 'status', key: 'status',
+      filters: [
+        { text: 'Mới 100%', value: 'new' },
+        { text: 'Like New', value: 'like_new' },
+        { text: 'Đã dùng (Tốt)', value: 'used_good' },
+        { text: 'Cũ / Xước', value: 'used_bad' },
+      ],
+      onFilter: (value, record) => record.status === value,
+      render: (status) => {
+        let color = 'default';
+        let text = 'Không xác định';
+        switch (status) {
+          case 'new':       color = 'green'; text = 'MỚI 100%'; break;
+          case 'like_new':  color = 'cyan';  text = 'LIKE NEW'; break;
+          case 'used_good': color = 'blue';  text = 'ĐÃ DÙNG (TỐT)'; break;
+          case 'used_bad':  color = 'red';   text = 'CŨ / XƯỚC'; break;
+          default: break;
+        }
+        return <Tag color={color}>{text}</Tag>;
+      }
+    },
     { title: 'Mô tả', dataIndex: 'description', key: 'description', ellipsis: true },
     {
-        title: 'Hành động', key: 'action',
-        render: (_, record) => (
-            <Space>
-                <Button icon={<EditOutlined />} onClick={() => { setEditingProduct(record); setIsModalOpen(true); }}>Sửa</Button>
-                <Popconfirm title="Xóa sản phẩm này?" onConfirm={() => handleDelete(record.id)} okButtonProps={{ danger: true }}>
-                    <Button danger icon={<DeleteOutlined />}>Xóa</Button>
-                </Popconfirm>
-            </Space>
-        )
+      title: 'Hành động', key: 'action',
+      render: (_, record) => (
+        <Space>
+          <Button icon={<EditOutlined />} onClick={() => { setEditingProduct(record); setIsModalOpen(true); }}>Sửa</Button>
+          <Popconfirm title="Xóa sản phẩm này?" onConfirm={() => handleDelete(record.id)} okButtonProps={{ danger: true }}>
+            <Button danger icon={<DeleteOutlined />}>Xóa</Button>
+          </Popconfirm>
+        </Space>
+      )
     }
   ];
 
   return (
     <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
       <Header style={{ padding: '0 20px', background: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', boxShadow: '0 1px 4px rgba(0,21,41,0.08)' }}>
-         <h2 style={{ margin: 0, color: '#001529' }}>Kênh người bán - {currentUser.fullname}</h2>
-         <Button type="primary" danger icon={<LogoutOutlined />} onClick={logout}>Đăng xuất</Button>
+        <h2 style={{ margin: 0, color: '#001529' }}>Kênh người bán - {currentUser.fullName}</h2>
+        <Button type="primary" danger icon={<LogoutOutlined />} onClick={logout}>Đăng xuất</Button>
       </Header>
 
       <Content style={{ margin: '20px' }}>
-         <DataTable 
-            title="Danh sách sản phẩm của tôi"
-            dataSource={products}
-            columns={columns}
-            loading={loading}
-            onCreate={() => { setEditingProduct(null); setIsModalOpen(true); }}
-         />
+        <DataTable
+          title="Kho hàng của tôi"
+          dataSource={products}
+          columns={columns}
+          loading={loading}
+          onCreate={() => { setEditingProduct(null); setIsModalOpen(true); }}
+        />
       </Content>
 
       <Modal
-        title={editingProduct ? "Sửa sản phẩm" : "Đăng sản phẩm mới"}
+        title={editingProduct ? "Cập nhật sản phẩm" : "Đăng bán sản phẩm"}
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}
         destroyOnClose
+        width={600}
       >
         <Form form={form} layout="vertical" onFinish={handleSubmit}>
-            <Form.Item name="name" label="Tên sản phẩm" rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}>
-                <Input placeholder="Ví dụ: iPhone 15 Pro Max" />
-            </Form.Item>
-            
-            <Form.Item name="price" label="Giá bán" rules={[{ required: true, message: 'Vui lòng nhập giá' }]}>
-                <InputNumber style={{ width: '100%' }} placeholder="Nhập giá tiền" formatter={formatNumber} parser={parseNumber} addonAfter="VNĐ" />
-            </Form.Item>
+          <Form.Item name="name" label="Tên sản phẩm" rules={[{ required: true, message: 'Vui lòng nhập tên sản phẩm' }]}>
+            <Input placeholder="Ví dụ: iPhone 15 Pro Max" />
+          </Form.Item>
 
-            <Form.Item name="status" label="Tình trạng thực tế" rules={[{ required: true, message: 'Vui lòng chọn tình trạng' }]}>
-                <Select placeholder="Chọn tình trạng sản phẩm">
-                    <Option value="new">🆕 Mới 100% (Fullbox/Chưa bóc seal)</Option>
-                    <Option value="like_new">✨ Like New (99% - Như mới)</Option>
-                    <Option value="used_good">👌 Đã qua sử dụng (Còn tốt, ít xước)</Option>
-                    <Option value="used_bad">⚠️ Cũ / Trầy xước nhiều / Hỏng nhẹ</Option>
-                </Select>
-            </Form.Item>
+          <Form.Item name="price" label="Giá bán" rules={[{ required: true, message: 'Vui lòng nhập giá' }]}>
+            <InputNumber style={{ width: '100%' }} placeholder="Nhập giá tiền" formatter={formatNumber} parser={parseNumber} addonAfter="VNĐ" />
+          </Form.Item>
 
-            {/* <Form.Item name="img" label="Link ảnh (URL)">
-                <Input placeholder="https://..." />
-            </Form.Item> */}
+          <Form.Item name="status" label="Tình trạng sản phẩm" rules={[{ required: true, message: 'Vui lòng chọn tình trạng' }]}>
+            <Select placeholder="Chọn tình trạng">
+              <Option value="new">🆕 Mới 100% (Fullbox/Chưa bóc seal)</Option>
+              <Option value="like_new">✨ Like New (99% - Như mới)</Option>
+              <Option value="used_good">👌 Đã qua sử dụng (Còn tốt)</Option>
+              <Option value="used_bad">⚠️ Cũ / Trầy xước nhiều</Option>
+            </Select>
+          </Form.Item>
 
-            <Form.Item name="img" label="Ảnh sản phẩm">
-                <ImageUpload />
-            </Form.Item>
+          {/* UPLOAD NHIỀU ẢNH */}
+          <Form.Item name="images" label="Ảnh sản phẩm (Tối đa 5 ảnh)">
+            <ImageUpload maxCount={5} />
+          </Form.Item>
 
-            <Form.Item name="description" label="Mô tả chi tiết">
-                <TextArea rows={4} placeholder="Nhập mô tả sản phẩm..." />
-            </Form.Item>
-            
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
-                <Button onClick={() => setIsModalOpen(false)}>Hủy</Button>
-                <Button type="primary" htmlType="submit">
-                    {editingProduct ? "Lưu thay đổi" : "Đăng bán ngay"}
-                </Button>
-            </div>
+          <Form.Item name="description" label="Mô tả chi tiết">
+            <TextArea rows={4} placeholder="Nhập mô tả sản phẩm..." />
+          </Form.Item>
+
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10, marginTop: 20 }}>
+            <Button onClick={() => setIsModalOpen(false)}>Hủy</Button>
+            <Button type="primary" htmlType="submit">
+              {editingProduct ? "Lưu thay đổi" : "Đăng bán ngay"}
+            </Button>
+          </div>
         </Form>
       </Modal>
     </Layout>
