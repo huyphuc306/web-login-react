@@ -10,6 +10,7 @@ import StarRating from '../components/StarRating';
 // 1. Import Service và Helper
 import { productService } from '../services/productService';
 import { formatCurrencyVN } from '../utils/formatHelper';
+import { Option } from 'antd/es/mentions';
 
 const { Header, Content, Footer } = Layout;
 const { Meta } = Card; // Thành phần con để hiển thị tiêu đề và mô tả trong Card
@@ -63,10 +64,10 @@ function Home() {
             tempProducts.sort((a, b) => a.name.localeCompare(b.name));
         } else if (sortType === 'priceLowHigh') {
             // Giá thấp đến cao
-            tempProducts.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
+            tempProducts.sort((a, b) => Number(a.price) - Number(b.price));
         } else if (sortType === 'priceHighLow') {
             // Giá cao đến thấp
-            tempProducts.sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
+            tempProducts.sort((a, b) => Number(b.price) - Number(a.price));
         }
 
         return tempProducts;
