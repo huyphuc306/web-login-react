@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom'; // Thư viện giúp chuyển trang
-import { accountData, userProfile } from '../data/mockData'; // Lấy tài khoản mẫu
+// ĐÃ XÓA: import { accountData, userProfile } from '../data/mockData';
 import { message, Button, Divider } from 'antd'; // Dùng message của Antd cho đẹp
 import { GoogleOutlined } from '@ant-design/icons';
-import axios from 'axios'; // Import axios
+// ĐÃ XÓA: import axios from 'axios';
 import { userService } from '../services/userService';
 import '../App.css';
 

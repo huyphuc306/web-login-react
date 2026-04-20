@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Layout, Button, message, Space, Modal, Form, Input, Popconfirm, InputNumber, Select, Tag } from 'antd';
 import { LogoutOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
@@ -23,9 +23,25 @@ function OwnerDashboard() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [form] = Form.useForm();
 
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      console.log("1. Bắt đầu gọi API");
+      const data = await productService.getAll();
+      const myProducts = data.filter(p => p.ownerId === currentUser.id);
+      setProducts(myProducts);
+    } catch (error) {
+      message.error('Lỗi tải dữ liệu sản phẩm');
+    } finally {
+      setLoading(false);
+    }
+  }, [currentUser.id]);;
+
+  // --- 3. Thêm fetchProducts vào mảng dependency của useEffect ---
   useEffect(() => {
+    console.log("2. Effect đang chạy"); // <-- Thêm dòng này
     fetchProducts();
-  }, []);
+  }, [fetchProducts]);
 
   useEffect(() => {
     if (isModalOpen) {
@@ -37,19 +53,6 @@ function OwnerDashboard() {
       }
     }
   }, [isModalOpen, editingProduct, form]);
-
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const data = await productService.getAll();
-      const myProducts = data.filter(p => p.ownerId === currentUser.id);
-      setProducts(myProducts);
-    } catch (error) {
-      message.error('Lỗi tải dữ liệu sản phẩm');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSubmit = async (values) => {
     try {
@@ -114,7 +117,8 @@ function OwnerDashboard() {
     },
     {
       title: 'Tên sản phẩm', dataIndex: 'name', key: 'name', width: '20%',
-      ...getStringSorter('name')
+      ...getStringSorter('name'),
+      ...getColumnSearchProps('name', 'Tên sản phẩm') 
     },
     {
       title: 'Giá', dataIndex: 'price', key: 'price',

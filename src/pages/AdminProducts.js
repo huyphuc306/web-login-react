@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layout, Button, message, Space, Tag, Popconfirm } from 'antd';
-import { LogoutOutlined, DeleteOutlined, EyeOutlined } from '@ant-design/icons';
+import { LogoutOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { productService } from '../services/productService';
 import { userService } from '../services/userService';
@@ -8,7 +8,7 @@ import { formatCurrencyVN } from '../utils/formatHelper';
 import { getNumberSorter, getStringSorter, useTableSearch } from '../utils/tableHelper';
 import DataTable from '../components/DataTable';
 import AdminSider from '../components/AdminSider';
-import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom'; // Đổi useNavigate thành Link
 
 const { Header, Content } = Layout;
 
@@ -19,7 +19,7 @@ function AdminProducts() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  const navigate = useNavigate();
+  // Đã xóa useNavigate vì không cần thiết nữa
   const { getColumnSearchProps } = useTableSearch(); 
 
   useEffect(() => {
@@ -53,11 +53,7 @@ function AdminProducts() {
     }
   };
 
-  // Hàm tìm tên Owner dựa vào ownerId
-  const getOwnerName = (ownerId) => {
-    const owner = users.find(u => u.id === ownerId);
-    return owner ? owner.fullname : 'Không xác định';
-  };
+  // Đã xóa hàm getOwnerName vì không sử dụng
 
   const handleDelete = async (id) => {
     try {
@@ -91,12 +87,13 @@ function AdminProducts() {
       width: '20%',
       ...getStringSorter('name'),
       render: (name, record) => (
-        <a 
-          onClick={() => navigate(`/product/${record.id}`)}
+        // Sửa: Dùng Link thay cho thẻ <a> để giải quyết lỗi href và bỏ cần useNavigate
+        <Link 
+          to={`/product/${record.id}`}
           style={{ color: '#1890ff', cursor: 'pointer', fontWeight: 500 }}
         >
           {name}
-        </a>    
+        </Link>    
       )
     },
     { 
