@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Upload, Button, message, Image, Space } from 'antd';
+import { Upload, Button, message, Image } from 'antd';
+// import Space from 'antd';
 import { UploadOutlined, LoadingOutlined, DeleteOutlined } from '@ant-design/icons';
 import { uploadService } from '../services/uploadService';
 

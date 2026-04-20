@@ -8,7 +8,7 @@ import AppHeader from '../components/AppHeader';
 const { Content } = Layout;
 
 function UserProfile() {
-  const { logout } = useAuth(); 
+  //const { logout } = useAuth(); 
   const [loading, setLoading] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
   const [form] = Form.useForm();

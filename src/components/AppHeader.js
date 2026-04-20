@@ -31,14 +31,14 @@ function AppHeader() {
     }
   }, []);
 
-  // --- 1. XỬ LÝ ĐĂNG XUẤT ---
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    localStorage.removeItem('currentUser');
-    setCurrentUser(null);
-    message.success('Đã đăng xuất!');
-    navigate('/login');
-  };
+  // --- 1. XỬ LÝ ĐĂNG XUẤT (không cần nữa | Bởi const { logout } = useAuth() ) ---
+  // const handleLogout = () => {
+  //   localStorage.removeItem('isLoggedIn');
+  //   localStorage.removeItem('currentUser');
+  //   setCurrentUser(null);
+  //   message.success('Đã đăng xuất!');
+  //   navigate('/login');
+  // };
 
   // --- 2. CẤU HÌNH MENU DROPDOWN (USER) ---
   // Mẹo: Đặt key là đường dẫn (URL) muốn đến

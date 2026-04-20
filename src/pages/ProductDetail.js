@@ -9,7 +9,7 @@ import { productService } from '../services/productService';
 import { userService } from '../services/userService';
 import { reviewService } from '../services/reviewService';
 import { formatCurrencyVN } from '../utils/formatHelper';
-import { cartService } from '../services/cartService';
+// Đã xóa: import { cartService } from '../services/cartService';
 import { cartHelper } from '../utils/cartHelper';
 
 const { Content, Footer } = Layout;
@@ -27,7 +27,7 @@ function ProductDetail() {
   const [product, setProduct] = useState(null);
   const [owner, setOwner] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [cartLoading, setCartLoading] = useState(false);
+  const [cartLoading] = useState(false);
 
   // State cho đánh giá
   const [isRateModalOpen, setIsRateModalOpen] = useState(false);
@@ -58,11 +58,12 @@ function ProductDetail() {
         }
 
         // Kiểm tra xem người dùng hiện tại đã đánh giá sản phẩm này chưa
-        if (currentUser && currentUser.id) {
+        const loggedInUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (loggedInUser && loggedInUser.id) {
           try {
             const allReviews = await reviewService.getAll();
             const myReview = allReviews.find(
-              (r) => r.productId === id && r.userId === currentUser.id
+              (r) => r.productId === id && r.userId === loggedInUser.id
             );
             if (myReview) {
               setExistingReview(myReview); // Lưu lại đánh giá cũ

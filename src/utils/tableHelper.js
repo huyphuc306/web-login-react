@@ -4,19 +4,19 @@ import { SearchOutlined } from '@ant-design/icons';
 
 // Đây là Custom Hook
 export const useTableSearch = () => {
-  const [searchText, setSearchText] = useState('');
-  const [searchedColumn, setSearchedColumn] = useState('');
+  // const [searchText, setSearchText] = useState('');
+  // const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef(null);
 
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    setSearchText(selectedKeys[0]);
-    setSearchedColumn(dataIndex);
+    // setSearchText(selectedKeys[0]);
+    // setSearchedColumn(dataIndex);
   };
 
   const handleReset = (clearFilters) => {
     clearFilters();
-    setSearchText('');
+    // setSearchText('');
   };
 
   // Hàm này trả về cấu hình cho cột

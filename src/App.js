@@ -1,5 +1,5 @@
 import './App.css';
-import { useState } from 'react';
+// import { useState } from 'react';
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 
@@ -61,7 +61,7 @@ function App() {
     <Router>
       <Routes>
         {/* Mặc định vào trang chủ luôn, không cần đăng nhập */}
-        <Route path="/" element={<Home />} />
+        <Route path="/" element={<AuthRedirect />} />
 
         {/* Đường dẫn riêng cho trang đăng nhập */}
         <Route path="/login" element={<Login />} />
