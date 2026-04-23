@@ -3,7 +3,7 @@ import { Layout, Button, message, Space, Modal, Form, Input, Popconfirm, InputNu
 import { LogoutOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { formatNumber, parseNumber, formatCurrencyVN } from '../utils/formatHelper';
-import { getNumberSorter, getStringSorter } from '../utils/tableHelper';
+import { getNumberSorter, getStringSorter, useTableSearch } from '../utils/tableHelper';
 import DataTable from '../components/DataTable';
 import { productService } from '../services/productService';
 import ImageUpload from '../components/ImageUpload';
@@ -22,6 +22,8 @@ function OwnerDashboard() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [form] = Form.useForm();
+
+  const { getColumnSearchProps } = useTableSearch(); 
 
   const fetchProducts = useCallback(async () => {
     setLoading(true);
@@ -117,8 +119,8 @@ function OwnerDashboard() {
     },
     {
       title: 'Tên sản phẩm', dataIndex: 'name', key: 'name', width: '20%',
-      ...getStringSorter('name'),
-      ...getColumnSearchProps('name', 'Tên sản phẩm') 
+      ...getColumnSearchProps('name', 'Tên sản phẩm'), 
+      ...getStringSorter('name')
     },
     {
       title: 'Giá', dataIndex: 'price', key: 'price',
