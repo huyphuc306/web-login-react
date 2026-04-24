@@ -16,7 +16,7 @@ function AdminProducts() {
   const { logout } = useAuth();
   
   const [products, setProducts] = useState([]);
-  const [users, setUsers] = useState([]);
+  //const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
 
   // Đã xóa useNavigate vì không cần thiết nữa
@@ -45,7 +45,7 @@ function AdminProducts() {
       });
 
       setProducts(productsWithOwner);
-      setUsers(userData);
+      //setUsers(userData);
     } catch (error) {
       message.error('Lỗi tải dữ liệu!');
     } finally {

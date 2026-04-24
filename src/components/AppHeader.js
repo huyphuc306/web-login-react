@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom'; // Thêm useLocation để biết đang ở trang nào
-import { Layout, Menu, Avatar, Dropdown, message, Space, Button } from 'antd';
+import { Layout, Menu, Avatar, Dropdown, Space, Button } from 'antd';
+// Xóa import { message } from 'antd';
 import { 
     UserOutlined, 
     LogoutOutlined, 
