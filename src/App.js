@@ -14,6 +14,8 @@ import OwnerDashboard from './pages/OwnerDashboard';
 import UserProfile from './pages/UserProfile';
 import AdminProducts from './pages/AdminProducts';
 import Cart from './pages/Cart';
+import Chat from './pages/Chat';
+import TawkChat from './components/TawkChat';
 
 const rolePaths = {
   admin: '/admin',
@@ -22,7 +24,7 @@ const rolePaths = {
 
 function AuthRedirect() {
 
-  console.log('1. AuthRedirect bắt đầu chạy');
+  console.log('1. AuthRedirect bắt đầu chạy mamamamamaam');
 
   let user = null;
 
@@ -77,6 +79,8 @@ function App() {
         }
         />
 
+        <Route path="/chat" element={<Chat />} />
+
         {/* ÁP DỤNG BẢO VỆ CHO ROUTE ADMIN */}
         <Route
           path="/admin"
@@ -124,6 +128,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
 
       </Routes>
+      <TawkChat />
     </Router>
   );
 }

@@ -11,7 +11,8 @@ import {
     ShoppingCartOutlined,
     AppstoreOutlined,
     DashboardOutlined,
-    HistoryOutlined
+    HistoryOutlined,
+    MessageOutlined
 } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 
@@ -84,6 +85,7 @@ function AppHeader() {
   const handleUserMenuClick = (e) => {
     if (e.key === 'logout') {
         logout();
+        navigate('/login');
     } else {
         // Các trường hợp còn lại: Điều hướng theo key
         // Ví dụ: key là '/profile' -> navigate('/profile')
@@ -102,6 +104,11 @@ function AppHeader() {
         key: '/products', // (Ví dụ) Trang danh sách sản phẩm
         label: 'Sản phẩm',
         icon: <AppstoreOutlined />
+    },
+    { 
+        key: '/chat', // Route dẫn đến trang chat
+        label: 'Tin Nhắn',
+        icon: <MessageOutlined />
     },
     { 
         key: '/cart', // (Ví dụ) Trang giỏ hàng
